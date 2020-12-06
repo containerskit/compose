@@ -1,0 +1,4 @@
+image: containerskit/compose
+config:
+  binds:
+  - /var/run:/var/run
