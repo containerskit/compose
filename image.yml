@@ -31,6 +31,8 @@ onboot:
 services:
 - name: rngd
   image: linuxkit/rngd:v0.8
+- name: ntpd
+  image: linuxkit/openntpd:v0.8
 - name: sshd
   image: linuxkit/sshd:666b4a1a323140aa1f332826164afba506abf597
   binds:
@@ -48,13 +50,11 @@ services:
   - /sys:/sys
   capabilities:
   - all
-- name: ntpd
-  image: linuxkit/openntpd:v0.8
 - name: docker
   image: docker:19.03.8-dind
   capabilities:
   - all
-  net: host
+  pid: host
   mounts:
   - type: cgroup
     options:
@@ -63,22 +63,32 @@ services:
     - noexec
     - nodev
     - relatime
+  - type: bind
+    source: /sys/fs/cgroup
+    destination: /sys/fs/cgroup
+    options:
+    - rw
+    - rbind
+    - rshared
+    - nosuid
+    - noexec
+    - nodev
+    - relatime
   binds:
+  - /dev:/dev
   - /etc/resolv.conf:/etc/resolv.conf
-  - /var/lib/docker:/var/lib/docker
   - /lib/modules:/lib/modules
+  - /run:/run
+  - /var:/var:rshared,rbind
   - /etc/docker/daemon.json:/etc/docker/daemon.json
-  - /run/docker:/var/run
+  rootfsPropagation: shared
   command:
   - /usr/local/bin/docker-init
   - /usr/local/bin/dockerd
-  runtime:
-    mkdir:
-    - /run/docker
 - name: compose
   image: containerskit/compose:1.0.0
   binds:
-  - /run/docker:/var/run
+  - /var/run:/var/run
   - /etc/resolv.conf:/etc/resolv.conf
   - /run/config/userdata:/opt/docker-compose.yml
   command:
@@ -86,9 +96,6 @@ services:
   - -f
   - /opt/docker-compose.yml
   - up
-  runtime:
-    mkdir:
-    - /run/docker
 files:
 - path: var/lib/docker
   directory: true

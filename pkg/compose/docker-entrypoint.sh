@@ -6,9 +6,5 @@ while [ ! -S /var/run/docker.sock ]; do
     sleep 1
 done
 
-if [ -f /run/hostname ]; then
-    HOSTNAME=$(cat /run/hostname)
-    exec HOSTNAME=${HOSTNAME} docker-compose $@
-else
-    exec docker-compose $@
-fi
+HOSTNAME=${HOSTNAME:-$(cat /etc/hostname)}
+exec env HOSTNAME=${HOSTNAME} docker-compose $@
