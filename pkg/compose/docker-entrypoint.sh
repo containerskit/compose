@@ -6,5 +6,5 @@ while [ ! -S /var/run/docker.sock ]; do
     sleep 1
 done
 
-HOSTNAME=${HOSTNAME:-$(cat /etc/hostname)}
+HOSTNAME=$(hostname)
 exec env HOSTNAME=${HOSTNAME} docker-compose $@

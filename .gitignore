@@ -1,0 +1,5 @@
+docker-compose.yml
+*-efi.iso
+*-efi-state
+*.vmdk
+*.iso
